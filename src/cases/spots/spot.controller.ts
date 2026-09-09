@@ -13,7 +13,7 @@ import {
 
 import { Spot } from './spot.entity';
 
-import { SpotService } from './Spot.service';
+import { SpotService } from './spot.service';
 import { createSpotDto } from './dto/create-spot';
 import { updateSpotDto } from './dto/update-spot';
 
@@ -50,3 +50,5 @@ export class SpotController {
     return this.service.remove(id);
   }
 }
+
+export { SpotService };

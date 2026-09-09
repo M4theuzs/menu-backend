@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CategoryModule } from './cases/categories/category.modules';
+import { ProductModule } from './cases/products/product.modules';
+import { Spot } from './cases/spots/spot.entity';
+import { SpotModule } from './cases/spots/spot.modules';
 
 @Module({
   imports: [
@@ -28,8 +32,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         };
       },
     }),
+    CategoryModule,
+    ProductModule,
+    SpotModule,
   ],
-  controllers: [],
-  providers: [],
+
 })
 export class AppModule {}
