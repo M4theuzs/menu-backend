@@ -6,6 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+
 import { GuestCheck, GuestCheckStatus } from './guest-check.entity';
 import { CreateGuestCheckDto } from './dto/create-guest-check';
 import { Spot } from '../spots/spot.entity';
@@ -21,7 +22,7 @@ export class GuestCheckService {
   ) {}
 
   async create(dto: CreateGuestCheckDto): Promise<GuestCheck> {
-    //Regra #1 Não se abre comanda em mesa inexistente
+    // Regra #1: Não se abre comanda em mesa inexistente
     const spot = await this.spotRepository.findOneBy({
       id: dto.spotId,
       active: true,
@@ -29,11 +30,11 @@ export class GuestCheckService {
 
     if (!spot) {
       throw new NotFoundException(
-        'Não foi encontrado uma mesa ativa com o ID fornecido.',
+        'Não foi encontrada uma mesa ativa com o ID fornecido.',
       );
     }
 
-    //Regra #2 Não se abre comanda em mesa que já tenha uma comanda aberta
+    // Regra #2: Não se abre comanda em mesa que já tenha uma comanda aberta
     const opened = await this.guestCheckRepository.exists({
       where: {
         spot: { id: dto.spotId },
@@ -47,7 +48,7 @@ export class GuestCheckService {
       );
     }
 
-    //Se chegou aqui, deu boa, grava o registro
+    // Se chegou aqui, grava o registro
     const guestCheck = this.guestCheckRepository.create({
       spot,
       status: GuestCheckStatus.OPENED,
@@ -57,7 +58,12 @@ export class GuestCheckService {
   }
 
   async findOne(id: string): Promise<GuestCheck> {
-    const guestCheck = await this.guestCheckRepository.findOneBy({ id });
+    const guestCheck = await this.guestCheckRepository.findOne({
+      where: { id },
+      relations: {
+        spot: true,
+      },
+    });
 
     if (!guestCheck) {
       throw new NotFoundException('Comanda não encontrada');
@@ -69,17 +75,39 @@ export class GuestCheckService {
   async close(id: string): Promise<GuestCheck> {
     const guestCheck = await this.findOne(id);
 
-    //Regra #1: Só posso fechar uma comanda aberta
+    // Regra #1: Só posso fechar uma comanda aberta
     if (guestCheck.status === GuestCheckStatus.CLOSED) {
       throw new BadRequestException('A comanda já está fechada.');
     }
 
-    //Regra #2: Não posso fechar uma comanda com pedidos que não forem entregues
-    //TO_DO: Implementar isso depois (divida tecnica)
+    // Regra #2:
+    // Não posso fechar uma comanda com pedidos que não forem entregues
+    // TODO: Implementar depois
 
-    //Se chegou aqui deu certo
     guestCheck.status = GuestCheckStatus.CLOSED;
 
     return this.guestCheckRepository.save(guestCheck);
+  }
+
+  findOpenedBySpotId(spotId: string): Promise<GuestCheck | null> {
+    return this.guestCheckRepository.findOne({
+      where: {
+        spot: { id: spotId },
+        status: GuestCheckStatus.OPENED,
+      },
+      relations: {
+        spot: true,
+      },
+    });
+  }
+
+  async findOrCreateOpened(spotId: string): Promise<GuestCheck> {
+    const opened = await this.findOpenedBySpotId(spotId);
+
+    if (opened) {
+      return opened;
+    }
+
+    return this.create({ spotId });
   }
 }
