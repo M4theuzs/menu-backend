@@ -5,6 +5,7 @@ import { CategoryModule } from './cases/categories/category.modules';
 import { ProductModule } from './cases/products/product.modules'; 
 import { SpotModule } from './cases/spots/spot.modules'; 
 import { GuestCheckModule } from './cases/guest-checks/guest-check.modules'; 
+import { OrderModule } from './cases/oreders/order.modules';
  
 @Module({ 
   imports: [ 
@@ -38,6 +39,7 @@ import { GuestCheckModule } from './cases/guest-checks/guest-check.modules';
     ProductModule, 
     SpotModule, 
     GuestCheckModule, 
+    OrderModule
   ], 
 }) 
 export class AppModule {}

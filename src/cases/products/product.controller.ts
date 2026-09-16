@@ -16,7 +16,7 @@ import { CreateProductDto } from './dto/create-product';
 import { UpdateProductDto } from './dto/update-product';
 import { ProductService } from './product.service';
 
-@Controller('categorias')
+@Controller('products')
 export class ProductController {
   constructor(private readonly service: ProductService) {}
 

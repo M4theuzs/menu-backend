@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto, CreateOrderItemDto } from "./dto/create-order";
 import { OrderItem } from "./entities/order-item.entity";
 import { Order, Orderstatus } from "./entities/order-entity";
@@ -6,6 +6,7 @@ import { GuestCheckService } from "../guest-checks/guest-check.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ProductService } from "../products/product.service";
+import { UpdateOrderStatusDto } from "./dto/update-order-status";
 
 @Injectable()
 export class OrderService {
@@ -28,6 +29,7 @@ export class OrderService {
         return this.orderItemRepository.create({
             product,
             quantity: dto.quantity,
+            price: product.price,
             subtotal
         });
     }
@@ -62,4 +64,43 @@ export class OrderService {
         return this.orderRepository.save(order);
     }
 
+    findAll(): Promise<Order[]>{
+    return this.orderRepository.find({
+      order: { createdAt: 'ASC' }
+    });
+}
+
+async findOne(id: string): Promise<Order> {
+    const order = await this.orderRepository.findOneBy({ id });
+
+    if (!order) {
+      throw new NotFoundException('Pedido não encontrado!');
+    }
+
+    return order;
+}
+
+    async updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<Order> {
+        const order = await this.findOne(id);
+
+        // determino a sequencia obrigatoria de mudança de status 
+        const nextStatus : Record<Orderstatus, Orderstatus | undefined> = {
+            [Orderstatus.NEW]: Orderstatus.PREPARING,
+            [Orderstatus.PREPARING]: Orderstatus.READY,
+            [Orderstatus.READY]: Orderstatus.DELIVERED,
+            [Orderstatus.DELIVERED]: undefined,
+            [Orderstatus.ITEMS]: undefined
+        }
+
+        //VERIFICO SE O CLIENTE ESTA ENVIANDO UM ESTATUS VALIDO
+        if (nextStatus[dto.status] !== dto.status){
+            throw new BadRequestException('status ivalido!')
+
+        }
+         
+        order.status = dto.status
+
+        return this.orderRepository.save(order);
+
+    }
 }
