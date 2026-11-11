@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUrl,
   MaxLength,
 } from 'class-validator';
 
@@ -22,4 +23,8 @@ export class updateCategoryDto {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   @IsBoolean()
   active?: boolean;
+
+  @IsOptional()
+  @IsUrl()
+  icon?: string;
 }
