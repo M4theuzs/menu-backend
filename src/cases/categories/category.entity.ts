@@ -11,6 +11,9 @@ export class Category {
   @Column({ type: 'text', nullable: true })
   icon: string;
 
+  @Column({ type: 'int', default: 0 })
+  displayOrder: number;
+
   @Column({ type: 'boolean', default: true })
   active: boolean;
 }

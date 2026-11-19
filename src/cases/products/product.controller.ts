@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseBoolPipe,
   ParseUUIDPipe,
   Patch,
   Post,
@@ -24,9 +25,11 @@ export class ProductController {
   @Get()
   findAll(
     @Query('categoryId', new ParseUUIDPipe({ optional: true }))
-    categoryId?: string
+    categoryId?: string,
+    @Query('vegetarian', new ParseBoolPipe({ optional: true }))
+    vegetarian?: boolean,
   ): Promise<Product[]> {
-    return this.service.findAll(categoryId);
+    return this.service.findAll(categoryId, vegetarian);
   }
 
   @Get(':id')

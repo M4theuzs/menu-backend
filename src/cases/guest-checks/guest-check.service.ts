@@ -57,6 +57,14 @@ export class GuestCheckService {
     return this.guestCheckRepository.save(guestCheck);
   }
 
+  findAll(status?: GuestCheckStatus): Promise<GuestCheck[]> {
+    return this.guestCheckRepository.find({
+      where: status ? { status } : {},
+      relations: { spot: true },
+      order: { createdAt: 'ASC' },
+    });
+  }
+
   async findOne(id: string): Promise<GuestCheck> {
     const guestCheck = await this.guestCheckRepository.findOne({
       where: { id },

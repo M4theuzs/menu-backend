@@ -1,9 +1,9 @@
 import {
   IsBoolean,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   MaxLength,
 } from 'class-validator';
 
@@ -25,6 +25,10 @@ export class updateCategoryDto {
   active?: boolean;
 
   @IsOptional()
-  @IsUrl()
+  @IsString()
   icon?: string;
+
+  @IsOptional()
+  @IsInt()
+  displayOrder?: number;
 }

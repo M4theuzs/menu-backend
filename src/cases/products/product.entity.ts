@@ -27,6 +27,12 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   picture?: string;
 
+  @Column({ type: 'boolean', default: false })
+  vegetarian: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  isNew: boolean;
+
   @ManyToOne(() => Category, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: Category | null;

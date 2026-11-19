@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class createCategoryDto {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -10,6 +17,14 @@ export class createCategoryDto {
   name: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsString()
   icon?: string;
+
+  @IsOptional()
+  @IsInt()
+  displayOrder?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 }

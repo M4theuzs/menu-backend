@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto, CreateOrderItemDto } from "./dto/create-order";
 import { OrderItem } from "./entities/order-item.entity";
 import { Order, Orderstatus } from "./entities/order-entity";
@@ -66,12 +66,16 @@ export class OrderService {
 
     findAll(): Promise<Order[]>{
     return this.orderRepository.find({
-      order: { createdAt: 'ASC' }
+      order: { createdAt: 'ASC' },
+      relations: { guestCheck: { spot: true }, items: { product: true } },
     });
 }
 
 async findOne(id: string): Promise<Order> {
-    const order = await this.orderRepository.findOneBy({ id });
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: { guestCheck: { spot: true }, items: { product: true } },
+    });
 
     if (!order) {
       throw new NotFoundException('Pedido não encontrado!');
@@ -83,21 +87,8 @@ async findOne(id: string): Promise<Order> {
     async updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<Order> {
         const order = await this.findOne(id);
 
-        // determino a sequencia obrigatoria de mudança de status 
-        const nextStatus : Record<Orderstatus, Orderstatus | undefined> = {
-            [Orderstatus.NEW]: Orderstatus.PREPARING,
-            [Orderstatus.PREPARING]: Orderstatus.READY,
-            [Orderstatus.READY]: Orderstatus.DELIVERED,
-            [Orderstatus.DELIVERED]: undefined,
-            [Orderstatus.ITEMS]: undefined
-        }
-
-        //VERIFICO SE O CLIENTE ESTA ENVIANDO UM ESTATUS VALIDO
-        if (nextStatus[dto.status] !== dto.status){
-            throw new BadRequestException('status ivalido!')
-
-        }
-         
+        // As transições são livres: qualquer status pode ir para qualquer outro.
+        // O @IsEnum do DTO já garante que o valor enviado é um status válido.
         order.status = dto.status
 
         return this.orderRepository.save(order);
